@@ -1,0 +1,17 @@
+server:
+  port: ${PORT:8761}
+
+spring:
+  application:
+    name: service-discovery-server
+  jmx:
+    default-domain: service-discovery-server
+
+eureka:
+  instance:
+    hostname: servicediscovery
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+    server:
+      waitTimeInMsWhenSyncEmpty: 0

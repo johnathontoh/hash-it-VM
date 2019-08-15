@@ -1,0 +1,117 @@
+version: '2'
+services:
+    configserver:
+        container_name: configserver
+        build:
+            context: ./configuration-management/docker
+            dockerfile: Dockerfile.local
+        image: configserver:latest
+        environment:
+            JAVA_OPTIONS: '-Xmx352278K -Xss1M -XX:ReservedCodeCacheSize=240M -XX:MaxDirectMemorySize=10M -XX:MaxMetaspaceSize=126953K -Dcom.sun.management.jmxremote.port=9000 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=9000 -Djava.rmi.server.hostname=localhost'
+        expose:
+            - 8888
+        ports:
+            - 8888:8888
+        networks:
+            - hashit-network
+    servicediscovery:
+        container_name: servicediscovery
+        build:
+            context: ./service-discovery/docker
+            dockerfile: Dockerfile.local
+        image: servicediscovery:latest
+        environment:
+            JAVA_OPTIONS: '-Xmx352278K -Xss1M -XX:ReservedCodeCacheSize=240M -XX:MaxDirectMemorySize=10M -XX:MaxMetaspaceSize=126953K -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=9001 -Djava.rmi.server.hostname=localhost'
+            JWT_ENABLED: "true"
+        expose:
+        - 8761
+        ports:
+        - 8761:8761
+        networks:
+        - hashit-network
+    apigateway:
+        container_name: hashitapigateway
+        build:
+            context: ./api-gateway/docker
+            dockerfile: Dockerfile.local
+        image: hashitapigateway:latest
+        environment:
+            JAVA_OPTIONS: '-Xmx1000M -Xss1M -XX:ReservedCodeCacheSize=240M -XX:MaxDirectMemorySize=10M -XX:MaxMetaspaceSize=126953K -Dcom.sun.management.jmxremote.port=9003 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=9003 -Djava.rmi.server.hostname=localhost'
+            SPRING_APPLICATION_JSON: '{"spring": {"cloud": {"config": {"uri": "http://configserver:8888"}}}}'
+            EUREKA_URI: "http://servicediscovery:8761/eureka"
+            JWT_ENABLED: "false"
+        expose:
+        - 8080
+        ports:
+        - 8080:8080
+        networks:
+        - hashit-network
+        links:
+        - configserver:configserver
+        - servicediscovery:servicediscovery
+        depends_on:
+        - configserver
+        - servicediscovery
+        logging:
+            driver: json-file
+    uaas-management:
+        container_name: uaas-management
+        build:
+            context: ./uaas/docker
+            dockerfile: Dockerfile.local
+        image: uaas-management:latest
+        environment:
+            JAVA_OPTIONS: '-Xmx2048000K -Xss1024000K -XX:ReservedCodeCacheSize=240M -XX:MaxDirectMemorySize=10M -XX:MaxMetaspaceSize=1024000K -Dcom.sun.management.jmxremote.port=9007 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=9007 -Djava.rmi.server.hostname=localhost'
+            SPRING_APPLICATION_JSON: '{"spring": {"cloud": {"config": {"uri": "http://configserver:8888"}}}}'
+            EUREKA_URI: "http://servicediscovery:8761/eureka"
+            JWT_ENABLED: "true"
+        expose:
+        - 1025
+        ports:
+        - 1025:1025
+        networks:
+            hashit-network:
+                aliases:
+                - uaas-management
+        links:
+        - configserver:configserver
+        - servicediscovery:servicediscovery
+        depends_on:
+        - configserver
+        - servicediscovery
+        - apigateway
+        logging:
+            driver: json-file
+    ethereum-management:
+        container_name: ethereum-management
+        build:
+            context: ./ethereum-management/docker
+            dockerfile: Dockerfile.local
+        image: ethereum-management:latest
+        environment:
+            JAVA_OPTIONS: '-Xmx2048000K -Xss1024000K -XX:ReservedCodeCacheSize=240M -XX:MaxDirectMemorySize=10M -XX:MaxMetaspaceSize=1024000K -Dcom.sun.management.jmxremote.port=9007 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=9007 -Djava.rmi.server.hostname=localhost'
+            SPRING_APPLICATION_JSON: '{"spring": {"cloud": {"config": {"uri": "http://configserver:8888"}}}}'
+            EUREKA_URI: "http://servicediscovery:8761/eureka"
+            JWT_ENABLED: "true"
+        expose:
+        - 1027
+        ports:
+        - 1027:1027
+        networks:
+            hashit-network:
+                aliases:
+                - ethereum-management
+        links:
+        - configserver:configserver
+        - servicediscovery:servicediscovery
+        - apigateway
+        depends_on:
+        - configserver
+        - servicediscovery
+        - uaas-management
+        - apigateway
+        logging:
+            driver: json-file
+networks:
+    hashit-network:
+        driver: bridge

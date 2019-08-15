@@ -1,0 +1,10 @@
+FROM openjdk:alpine
+
+EXPOSE 8888
+
+COPY files/config-server-entrypoint.sh /opt/bin/
+COPY files/configserver.jar /opt/lib/
+
+ENTRYPOINT ["/opt/bin/config-server-entrypoint.sh"]
+
+

@@ -1,0 +1,17 @@
+FROM openjdk:alpine
+
+EXPOSE 1027
+
+COPY files/ethereum-management-server.jar /opt/lib/
+COPY files/ethereum-management-entrypoint.sh /opt/bin/
+RUN mkdir /opt/bin/wallets
+RUN mkdir /opt/bin/contracts
+COPY files/MedicalHistory.sol /opt/bin/contracts/
+
+RUN chmod 755 /opt/bin/ethereum-management-entrypoint.sh
+
+RUN apk update && apk add ca-certificates && update-ca-certificates && apk add openssl
+
+RUN cd /usr/bin/ && wget https://github.com/ethereum/solidity/releases/download/v0.4.25/solc-static-linux && mv solc-static-linux solc && chmod 755 /usr/bin/solc
+
+ENTRYPOINT ["/opt/bin/ethereum-management-entrypoint.sh"]

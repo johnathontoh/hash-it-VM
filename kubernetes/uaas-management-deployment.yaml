@@ -1,0 +1,49 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: uaas-management
+  name: uaas-management
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        io.kompose.service: uaas-management
+    spec:
+      containers:
+      - env:
+        - name: EUREKA_URI
+          value: http://servicediscovery:8761/eureka
+        - name: JAVA_OPTIONS
+          value: -Xmx2048000K -Xss1024000K -XX:ReservedCodeCacheSize=240M -XX:MaxDirectMemorySize=10M
+            -XX:MaxMetaspaceSize=1024000K -Dcom.sun.management.jmxremote.port=9007
+            -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+            -Dcom.sun.management.jmxremote.rmi.port=9007 -Djava.rmi.server.hostname=localhost
+        - name: JWT_ENABLED
+          value: "true"
+        - name: SPRING_APPLICATION_JSON
+          value: '{"spring": {"cloud": {"config": {"uri": "http://configserver:8888"}}}}'
+        image: docker.paloitcloud.com.sg/hash-it/uaas-management:latest
+        name: uaas-management
+        ports:
+        - containerPort: 1025
+        resources: {}
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: regsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: uaas-management
+  name: uaas-management
+spec:
+  ports:
+  - name: "1025"
+    port: 1025
+    targetPort: 1025
+  selector:
+    io.kompose.service: uaas-management

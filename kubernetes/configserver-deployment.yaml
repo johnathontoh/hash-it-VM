@@ -1,0 +1,44 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: configserver
+  labels:
+    io.kompose.service: configserver
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        io.kompose.service: configserver
+    spec:
+      containers:
+      - env:
+        - name: JAVA_OPTIONS
+          value: -Xmx352278K -Xss1M -XX:ReservedCodeCacheSize=240M -XX:MaxDirectMemorySize=10M
+            -XX:MaxMetaspaceSize=126953K -Dcom.sun.management.jmxremote.port=9000
+            -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+            -Dcom.sun.management.jmxremote.rmi.port=9000 -Djava.rmi.server.hostname=localhost
+        image: docker.paloitcloud.com.sg/hash-it/configserver:latest
+        name: configserver
+        ports:
+        - containerPort: 8888
+        resources: {}
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: regsecret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: configserver
+  labels:
+    io.kompose.service: configserver
+spec:
+  ports:
+  - name: "8888"
+    port: 8888
+    targetPort: 8888
+  selector:
+    io.kompose.service: configserver

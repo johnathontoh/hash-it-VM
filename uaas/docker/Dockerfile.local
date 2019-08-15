@@ -1,0 +1,10 @@
+FROM openjdk:alpine
+
+EXPOSE 1025
+
+COPY files/uaas-server.jar /opt/lib/
+COPY files/uaas-management-entrypoint.sh /opt/bin/
+
+RUN chmod 755 /opt/bin/uaas-management-entrypoint.sh 
+
+ENTRYPOINT ["/opt/bin/uaas-management-entrypoint.sh"]

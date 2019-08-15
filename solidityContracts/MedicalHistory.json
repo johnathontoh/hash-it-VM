@@ -1,0 +1,32 @@
+[
+  {
+    "name": "basicMedicalInformation",
+    "type": "struct",
+    "description": "Basic Medical Information should contain global information on the patient such as date of birth, sex, etc"
+  },
+  {
+    "name": "medicalRecord",
+    "type": "struct",
+    "description": "Medical record should contain information relative to each visit of the patient such as date of visit, symptoms, diagnosis etc"
+  },
+  {
+    "name": "config_template_allow_basic_access_to_all_med_providers",
+    "type": "boolean"
+  },
+  {
+    "name": "config_template_allow_medical_history_read_access_to_all_med_providers",
+    "type": "boolean"
+  },
+  {
+    "name": "config_template_allow_medical_history_write_access_to_all_med_providers",
+    "type": "boolean"
+  },
+  {
+    "name": "config_template_allow_anyone_to_add_medical_provider",
+    "type": "boolean"
+  },
+  {
+    "name": "config_template_allow_anyone_to_add_users",
+    "type": "boolean"
+  }
+]

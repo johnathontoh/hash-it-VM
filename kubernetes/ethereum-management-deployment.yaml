@@ -1,0 +1,49 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: ethereum-management
+  name: ethereum-management
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        io.kompose.service: ethereum-management
+    spec:
+      containers:
+      - env:
+        - name: EUREKA_URI
+          value: http://servicediscovery:8761/eureka
+        - name: JAVA_OPTIONS
+          value: -Xmx2048000K -Xss1024000K -XX:ReservedCodeCacheSize=240M -XX:MaxDirectMemorySize=10M
+            -XX:MaxMetaspaceSize=1024000K -Dcom.sun.management.jmxremote.port=9007
+            -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+            -Dcom.sun.management.jmxremote.rmi.port=9007 -Djava.rmi.server.hostname=localhost
+        - name: JWT_ENABLED
+          value: "true"
+        - name: SPRING_APPLICATION_JSON
+          value: '{"spring": {"cloud": {"config": {"uri": "http://configserver:8888"}}}}'
+        image: docker.paloitcloud.com.sg/hash-it/ethereum-management:latest
+        name: ethereum-management
+        ports:
+        - containerPort: 1027
+        resources: {}
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: regsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: ethereum-management
+  name: ethereum-management
+spec:
+  ports:
+  - name: "1027"
+    port: 1027
+    targetPort: 1027
+  selector:
+    io.kompose.service: ethereum-management

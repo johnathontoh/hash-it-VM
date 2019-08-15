@@ -1,0 +1,10 @@
+FROM openjdk:alpine
+
+EXPOSE 8080
+
+COPY files/hashitapigateway.jar /opt/lib/
+COPY files/apigateway-entrypoint.sh /opt/bin/
+
+RUN chmod 755 /opt/bin/apigateway-entrypoint.sh 
+
+ENTRYPOINT ["/opt/bin/apigateway-entrypoint.sh"]

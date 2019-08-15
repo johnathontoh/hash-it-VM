@@ -1,0 +1,9 @@
+FROM openjdk:alpine
+
+EXPOSE 8761
+
+COPY files/servicediscovery.jar /opt/lib/
+COPY files/service-discovery-entrypoint.sh /opt/bin/
+
+ENTRYPOINT ["/opt/bin/service-discovery-entrypoint.sh"]
+
